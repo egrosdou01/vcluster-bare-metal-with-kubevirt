@@ -1,7 +1,7 @@
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
-  name: br0-vcluster-demo
+  name: br0-vcluster-manual
   namespace: p-default
 spec:
   config: |
@@ -16,20 +16,20 @@ spec:
 apiVersion: management.loft.sh/v1
 kind: VirtualClusterInstance
 metadata:
-  name: demo
+  name: manual-demo
   namespace: p-default
 spec:
   template:
     helmRelease:
       chart:
-        version: 0.31.0-rc.1
+        version: 0.34.0
       values: |
         controlPlane:
           backingStore:
             etcd:
               embedded:
                 enabled: true
-          endpoint: 192.168.100.2:8443
+          endpoint: 192.168.100.3:8443
           advanced:
             kubeVip:
               enabled: true
@@ -38,24 +38,14 @@ spec:
           statefulSet:
             pods:
               annotations:
-                k8s.v1.cni.cncf.io/networks: p-default/br0-vcluster-demo
-            env:
-              - name: VCLUSTER_NODECLAIM_WAIT_TIMEOUT
-                value: 1h
+                k8s.v1.cni.cncf.io/networks: p-default/br0-vcluster-manual
         privateNodes:
           enabled: true
-          autoNodes:
-            - provider: metal3
-              static:
-                - name: bare-metal
-                  quantity: 1
-              properties:
-                vcluster.com/os-image: ubuntu2404-20260307
     pro:
       enabled: true
   clusterRef:
     cluster: loft-cluster
-    namespace: loft-default-v-demo
-    virtualCluster: demo
+    namespace: loft-default-v-manual-demo
+    virtualCluster: manual-demo
   owner:
     user: admin
