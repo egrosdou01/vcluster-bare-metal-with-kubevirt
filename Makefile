@@ -1,6 +1,6 @@
 .PHONY: vind-up vind-down install install-cert-manager install-cni-static install-kubevirt install-bridge install-platform reset-admin-password install-os-image install-ssh-key install-node-provider install-network-environment create-vms create-machine create-vcluster create-ssh-service
 
-CLUSTER_NAME ?= bare-metal-fun
+CLUSTER_NAME ?= bare-metal-demo
 KUBECONFIG := $(CURDIR)/kubeconfig
 export KUBECONFIG
 
