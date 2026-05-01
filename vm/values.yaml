@@ -21,7 +21,7 @@ vms:
       namespace: default
       rootDevice: /dev/vda
 
-- name: bare-metal01
+- name: bare-metal02
   mac: "02:00:00:00:00:02"
   cpu:
     cores: 2
