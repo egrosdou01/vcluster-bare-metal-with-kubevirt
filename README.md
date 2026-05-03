@@ -36,6 +36,8 @@ make create-vms
 
 ## Usage
 
+There are two ways to provision and attach nodes to vCluster. Either perform a manual BareMetalHosts provisioning using the `NodeClaim` resource or use the vCluster auto-nodes option. The second will use Karpener to scale-up and down available bare metal nodes.
+
 ### Provision BareMetalHosts manually
 
 After `make create-vms`, the BareMetalHost resources appear in the platform UI.
@@ -66,22 +68,24 @@ The vCluster uses kube-vip on the bridge network and requests nodes from the met
 
 This takes several minutes end-to-end.
 
-### SSH into a provisioned machine
+### SSH Provisioned Machine
 
-Create a LoadBalancer service that forwards to the provisioned machine's SSH port:
-
-```bash
-make create-ssh-service
-```
-
-The default IP (`192.168.100.100`) matches if this is the only machine in the network. If not, edit `manifests/ssh-service.yaml` to match the machine's IP.
-
-Then SSH in:
+Create a new ssh-keypair for the deployment and replace the `ssh-demo-key`, `ssh-demo-key.pub`, and the `ssh-key.yaml` files. To SSH to the baremetalhosts, we can deploy the `bridge-jump-pod` pod. Copy the required keys to the pod and perform an SSH connection to the relevant endpoint.
 
 ```bash
-LB_IP=$(kubectl get svc bare-metal-ssh -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-ssh -i ssh-demo-key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@$LB_IP
+# Create an SSH key-pair
+$ ssh-keygen -b 2048 -t rsa
+
+# Copy SSH key details to bridge-jump-pod
+$ kubectl cp ssh-demo-key default/bridge-jump-pod:/tmp/ssh-demo-key
+$ kubectl cp ssh-demo-key.pub default/bridge-jump-pod:/tmp/ssh-demo-key.pub
+
+# Exec to bridge-jump-pod
+$ kubectl exec -it bridge-jump-pod -- bash
+# ssh -i /tmp/ssh-demo-key ubuntu@192.168.100.100
 ```
+
+**Note:** The baremetal host details after provisioning are coming from the `manifests/node-environment.yaml` file and property `metal3.vcluster.com/network-ip-range: 192.168.100.100-192.168.100.120`. To check the IP address assigned, execute `kubectl describe baremetalhost bare-metal01 | grep -i "metal3.vcluster.com/ip-address"` on the management/controller cluster.
 
 ### Individual targets
 
